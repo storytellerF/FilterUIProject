@@ -9,6 +9,7 @@
 /.idea/assetWizardSettings.xml
 /.idea/markdown-navigator-enh.xml
 /.idea/markdown-navigator.xml
+/.idea/dictionaries/*
 .DS_Store
 /build
 /captures
