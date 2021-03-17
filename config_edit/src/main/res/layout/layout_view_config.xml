@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/frameLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <Spinner
+        android:id="@+id/config_edit_name_list_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/config_edit_function_more_imageButton"
+        app:layout_constraintEnd_toStartOf="@+id/config_edit_function_more_imageButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/config_edit_function_more_imageButton" />
+
+    <ImageButton
+        android:id="@+id/config_edit_function_more_imageButton"
+        style="@android:style/Widget.DeviceDefault.ImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:adjustViewBounds="true"
+        android:background="#FFFFFF"
+        android:contentDescription="@string/string_content_description_menu_image_button"
+        android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_baseline_arrow_drop_down_circle_24" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

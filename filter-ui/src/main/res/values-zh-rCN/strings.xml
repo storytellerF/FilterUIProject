@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="string_filter_ui_icon_description">图标</string>
+    <string name="string_filter_ui_add_button">添加</string>
+    <string name="string_layout_item_data_range_filter_from">从</string>
+    <string name="string_layout_item_data_range_filter_to">到</string>
+</resources>

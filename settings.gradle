@@ -1,0 +1,6 @@
+include ':config_edit'
+include ':recycleview_ui_extra'
+include ':sort-ui'
+include ':filter-ui'
+include ':app'
+rootProject.name = "FilterUIProject"

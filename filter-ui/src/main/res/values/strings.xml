@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="string_filter_ui_icon_description">icon</string>
+    <string name="string_filter_ui_add_button">Add</string>
+    <string name="string_layout_item_data_range_filter_from">from</string>
+    <string name="string_layout_item_data_range_filter_to">to</string>
+</resources>

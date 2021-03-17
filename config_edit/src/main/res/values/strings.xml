@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="string_config_edit_popup_clone">clone</string>
+    <string name="string_config_edit_popup_rename">rename</string>
+    <string name="string_config_edit_popup_delete">delete</string>
+    <string name="string_config_edit_popup_import">import</string>
+    <string name="string_config_edit_popup_export">export</string>
+    <string name="string_config_edit_popup_new">new</string>
+    <string name="string_content_description_menu_image_button">菜单按钮</string>
+</resources>

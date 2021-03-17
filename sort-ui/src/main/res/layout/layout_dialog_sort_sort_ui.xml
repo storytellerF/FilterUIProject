@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.widget.FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.storyteller_f.config_edit.ConfigEditor
+        android:id="@+id/sort_ui_config_edit_configEditor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/sort_ui_button_add"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="50dp"
+        android:text="@string/string_sort_ui_add_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/sort_ui_recyclerView_filter_list"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="100dp"
+        tools:listitem="@layout/layout_item_sort_container" />
+
+</android.widget.FrameLayout>
