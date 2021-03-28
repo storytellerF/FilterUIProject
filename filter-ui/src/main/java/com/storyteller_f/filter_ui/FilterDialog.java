@@ -26,6 +26,7 @@ import com.storyteller_f.recycleview_ui_extra.DragItemHelper;
 import com.storyteller_f.recycleview_ui_extra.GeneralItemDecoration;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -85,17 +86,8 @@ public class FilterDialog<T extends Filterable> implements ConfigEditor.Listener
         return filterChains;
     }
 
-    public void init(String name, TypeAdapterFactory factory, TypeAdapterFactory configFactory) throws FileNotFoundException {
-        configEditor.init(name, factory, configFactory);
-//        Config lastConfig = configEditor.configs.getLastConfig();
-//        if (lastConfig instanceof FilterConfig) {
-//            List<FilterConfigItem> configItems = ((FilterConfig) lastConfig).getConfigItems();
-//            if (listener != null) {
-//                listener.onInitHistory(configItems);
-//                handle();
-//                filterItemAdapter.notifyDataSetChanged();
-//            }
-//        }
+    public void init(String name, TypeAdapterFactory... factory) throws IOException {
+        configEditor.init(name, factory);
     }
 
     public void show() {
@@ -136,13 +128,13 @@ public class FilterDialog<T extends Filterable> implements ConfigEditor.Listener
 
     public void save() {
         Log.d(TAG, "save() called");
-        Config lastConfig = configEditor.configs.getLastConfig();
+        Config lastConfig = configEditor.getLastConfig();
         if (lastConfig instanceof FilterConfig) {
             if (listener != null) {
                 List<FilterConfigItem> configItems = listener.onSaveState();
                 ((FilterConfig) lastConfig).reUpdate(configItems);
                 try {
-                    configEditor.toFile();
+                    configEditor.save();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(alertDialog.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -161,10 +153,9 @@ public class FilterDialog<T extends Filterable> implements ConfigEditor.Listener
     }
 
     @Override
-    public void onChangeChoose(long id, int position) {
-        Log.d(TAG, "onChangeChoose() called with: id = [" + id + "], position = [" + position + "]");
+    public void onChangeChoose(Config configAt) {
+//        Log.d(TAG, "onChangeChoose() called with: id = [" + id + "], position = [" + position + "]");
         if (listener != null) {
-            Config configAt = configEditor.configs.getConfigAt(position);
             if (configAt instanceof FilterConfig) {
                 listener.onInitHistory(((FilterConfig) configAt).getConfigItems());
                 handle();

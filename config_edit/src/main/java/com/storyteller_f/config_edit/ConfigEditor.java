@@ -19,26 +19,17 @@ import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
 public class ConfigEditor extends FrameLayout {
     private static final String TAG = "ConfigEditor";
-    public Configs configs;
     private Spinner spinner;
     private PopupMenu popupMenu;
     private SpinnerAdapter spinnerAdapter;
-    private File file;
-    private Gson gson;
     private Listener listener;
+    private ConfigEditorCore core;
 
     public ConfigEditor(Context context) {
         super(context);
@@ -60,114 +51,106 @@ public class ConfigEditor extends FrameLayout {
     }
 
     public void constructorInit() {
-        configs = new Configs();
+        core = new ConfigEditorCore();
         LayoutInflater.from(getContext()).inflate(R.layout.layout_view_config, this, true);
         spinner = findViewById(R.id.config_edit_name_list_spinner);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (listener != null) {
-                    listener.onChangeChoose(id,position);
-                    configs.choose(configs.getConfigAt(position).getId());
-                }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                Log.d(TAG, "onNothingSelected() called with: parent = [" + parent + "]");
-            }
-        });
         ImageButton imageButton = findViewById(R.id.config_edit_function_more_imageButton);
         popupMenu = new PopupMenu(getContext(), imageButton, Gravity.BOTTOM);
         popupMenu.inflate(R.menu.popop_menu_config_edit_function);
-        popupMenu.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.config_edit_popup_menu_new) {
-                if (listener != null) {
-                    configs.addConfig(listener.onNew());
-                    configs.choose(configs.getConfigAt(configs.size()-1).getId());
-                    refresh();
-                    return true;
-                }
-            }
-            Object selectedItem = spinner.getSelectedItem();
-            int index = spinner.getSelectedItemPosition();
-            Log.i(TAG, "initTwo: " + selectedItem.getClass());
-            if (!(selectedItem instanceof Config)) return false;
-            Config selected = (Config) selectedItem;
-            if (item.getItemId() == R.id.config_edit_popop_menu_clone) {
-                try {
-                    Config clone = (Config) selected.clone();
-                    clone.setName(clone.name + " 克隆");
-                    configs.choose(configs.addConfig(clone));
-                    refresh();
-                } catch (CloneNotSupportedException e) {
-                    e.printStackTrace();
-                }
-            } else if (item.getItemId() == R.id.config_edit_popop_menu_delete) {
-                configs.removeAt(index);
-                configs.choose(configs.getConfigAt(0).getId());
-                refresh();
-            } else if (item.getItemId() == R.id.config_edit_popop_menu_rename) {
-                EditText editText = new EditText(getContext());
-                editText.setText(selected.name);
-                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).setMessage("请输入").setTitle("重命名").setView(editText)
-                        .setPositiveButton("确认", null)
-                        .setNegativeButton("取消", (dialog, which) -> dialog.dismiss()).show();
-                alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
-                    String trim = editText.getText().toString().trim();
-                    if (!trim.isEmpty()) {
-                        selected.name = trim;
-                        ((BaseAdapter) spinnerAdapter).notifyDataSetChanged();
-                        alertDialog.dismiss();
-                    }
-                });
-            }
-            return false;
-        });
         imageButton.setOnClickListener(v -> popupMenu.show());
     }
 
-    private void refresh() {
+    private void refresh(int config) {
         ((BaseAdapter) spinnerAdapter).notifyDataSetChanged();
-        spinner.setSelection(configs.getLast());
+        spinner.setSelection(config);
     }
 
-    public void fromFile() throws FileNotFoundException {
-        if (!file.exists()) return;
-        FileReader json = new FileReader(file);
-        configs = gson.fromJson(json, Configs.class);
-        try {
-            json.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void save() {
+        core.save();
     }
 
-    public void toFile() throws Exception {
-        if (!file.exists()) {
-            if (!file.createNewFile()) {
-                throw new Exception("文件创建失败");
+    public void init(String name, TypeAdapterFactory... factory) throws IOException {
+        core.setCoreListener(new ConfigEditorCore.CoreListener() {
+            @Override
+            public void updateList(int config) {
+                refresh(config);
             }
-        }
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file));
-        bufferedWriter.write(gson.toJson(configs));
-        bufferedWriter.flush();
-        bufferedWriter.close();
-    }
 
-    public void init(String name, TypeAdapterFactory factory, TypeAdapterFactory configFactory) throws FileNotFoundException {
-        file = new File(getContext().getFilesDir(), "config-edit-" + name + ".json");
-        gson = new GsonBuilder().registerTypeAdapterFactory(factory).registerTypeAdapterFactory(configFactory).create();
-        fromFile();
+            @Override
+            public Config onNew() {
+                return listener.onNew();
+            }
+
+            @Override
+            public void onInit(Config configAt) {
+                listener.onChangeChoose(configAt);
+            }
+
+            @Override
+            public void bindEvent() {
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if (listener != null) {
+                            listener.onChangeChoose(core.getConfigAt(position));
+                            core.choose(core.getConfigAt(position).getId());
+                        }
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        Log.d(TAG, "onNothingSelected() called with: parent = [" + parent + "]");
+                    }
+                });
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    int index = spinner.getSelectedItemPosition();
+                    if (item.getItemId() == R.id.config_edit_popop_menu_rename) {
+                        Object selectedItem = spinner.getSelectedItem();
+                        Log.i(TAG, "initTwo: " + selectedItem.getClass());
+                        if (!(selectedItem instanceof Config)) return false;
+                        Config selected = (Config) selectedItem;
+                        EditText editText = new EditText(getContext());
+                        editText.setText(selected.name);
+                        AlertDialog alertDialog = new AlertDialog.Builder(getContext()).setMessage("请输入").setTitle("重命名").setView(editText)
+                                .setPositiveButton("确认", null)
+                                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss()).show();
+                        alertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v -> {
+                            String trim = editText.getText().toString().trim();
+                            if (!trim.isEmpty()) {
+                                selected.name = trim;
+                                ((BaseAdapter) spinnerAdapter).notifyDataSetChanged();
+                                alertDialog.dismiss();
+                            }
+                        });
+                    } else {
+                        String command;
+                        if (item.getItemId() == R.id.config_edit_popop_menu_delete)
+                            command = "delete";
+                        else if (item.getItemId() == R.id.config_edit_popup_menu_new) {
+                            command = "new";
+                        } else if (item.getItemId() == R.id.config_edit_popop_menu_clone) {
+                            command = "clone";
+                        } else {
+                            return false;
+                        }
+                        core.sendCommand(command, index);
+                    }
+                    return true;
+
+                });
+            }
+        });
+        core.init(name, getContext().getFilesDir().getAbsolutePath(), factory);
         spinnerAdapter = new BaseAdapter() {
             @Override
             public int getCount() {
-                return configs.size();
+                return core.size();
             }
 
             @Override
             public Config getItem(int position) {
-                return configs.getConfigAt(position);
+                return core.getConfigAt(position);
             }
 
             @Override
@@ -189,13 +172,19 @@ public class ConfigEditor extends FrameLayout {
             }
         };
         spinner.setAdapter(spinnerAdapter);
-        spinner.setSelection(configs.getLastIndex());
+//        file = new File(getContext().getFilesDir(), "config-edit-" + name + ".json");
+//        gson = new GsonBuilder().registerTypeAdapterFactory(factory).registerTypeAdapterFactory(configFactory).create();
+//        fromFile();
+//        spinner.setSelection(configs.getLastIndex());
+    }
+
+    public Config getLastConfig() {
+        return core.getLastConfig();
     }
 
     public interface Listener {
         Config onNew();
 
-        void onChangeChoose(long id, int position);
+        void onChangeChoose(Config configAt);
     }
-
 }

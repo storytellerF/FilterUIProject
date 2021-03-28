@@ -36,6 +36,7 @@ import com.storyteller_f.sort_ui.config.SortConfig;
 import com.storyteller_f.sort_ui.config.SortConfigItem;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -69,12 +70,12 @@ public class MainActivity extends AppCompatActivity {
         list.add(new ApplicationItem("com.android", "studio", calendar.getTime(), 89));
         try {
             sort();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         try {
             filter();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         RecyclerView recyclerView = findViewById(R.id.list);
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(applicationAdapter);
     }
 
-    private void filter() throws FileNotFoundException {
+    private void filter() throws IOException {
         List<FilterChain<ApplicationItem>> sortList = new ArrayList<>();
         sortList.add(new PackageFilter(null, null));
         sortList.add(new NameFilter(null, null));
@@ -97,13 +98,13 @@ public class MainActivity extends AppCompatActivity {
             filterDialog.filter(list);
             applicationAdapter.notifyDataSetChanged();
         });
-        RuntimeTypeAdapterFactory<FilterConfigItem> adapterFactory = RuntimeTypeAdapterFactory.of(FilterConfigItem.class, "config_edit_filter_config_item_config_key")
+        RuntimeTypeAdapterFactory<FilterConfigItem> filterConfigItemRuntimeTypeAdapterFactory = RuntimeTypeAdapterFactory.of(FilterConfigItem.class, "config_edit_filter_config_item_config_key")
                 .registerSubtype(DateConfigItemInFilter.class, "date")
                 .registerSubtype(NameConfigItemInFilter.class, "name")
                 .registerSubtype(PackageConfigItemInFilter.class, "package");
         RuntimeTypeAdapterFactory<Config> configRuntimeTypeAdapterFactory = RuntimeTypeAdapterFactory.of(Config.class, "config_edit_filter_config_key")
                 .registerSubtype(FilterConfig.class, "filter-config");
-        filterDialog.init("filter", adapterFactory, configRuntimeTypeAdapterFactory);
+        filterDialog.init("filter", filterConfigItemRuntimeTypeAdapterFactory, configRuntimeTypeAdapterFactory);
         filterDialog.setListener(new FilterDialog.Listener() {
             @Override
             public List<FilterConfigItem> onSaveState() {
@@ -143,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void sort() throws FileNotFoundException {
+    private void sort() throws IOException {
         List<SortChain<ApplicationItem>> sortList = new ArrayList<>();
         sortList.add(new PackageSort(null));
         sortList.add(new NameSort(null));

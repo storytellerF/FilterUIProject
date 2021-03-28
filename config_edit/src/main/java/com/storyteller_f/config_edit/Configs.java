@@ -1,6 +1,7 @@
 package com.storyteller_f.config_edit;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Configs {
     private final ArrayList<Config> configs;
@@ -84,4 +85,7 @@ public class Configs {
         return configs.size();
     }
 
+    public Iterator<Config> getIterator() {
+        return configs.iterator();
+    }
 }

@@ -25,6 +25,7 @@ import com.storyteller_f.sort_ui.config.SortConfig;
 import com.storyteller_f.sort_ui.config.SortConfigItem;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -79,8 +80,8 @@ public class SortDialog<T> implements ConfigEditor.Listener {
         return sort;
     }
 
-    public void init(TypeAdapterFactory factory, TypeAdapterFactory configFactory) throws FileNotFoundException {
-        configEditor.init("sort", factory, configFactory);
+    public void init(TypeAdapterFactory... factory) throws IOException {
+        configEditor.init("sort", factory);
 
 //        Config lastConfig = configEditor.configs.getLastConfig();
 //        if (lastConfig instanceof SortConfig) {
@@ -117,13 +118,13 @@ public class SortDialog<T> implements ConfigEditor.Listener {
     }
 
     public void save() {
-        Config lastConfig = configEditor.configs.getLastConfig();
+        Config lastConfig = configEditor.getLastConfig();
         if (lastConfig instanceof SortConfig) {
             if (listener != null) {
                 List<SortConfigItem> configItems = listener.onSaveState();
                 ((SortConfig) lastConfig).reUpdate(configItems);
                 try {
-                    configEditor.toFile();
+                    configEditor.save();
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(alertDialog.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -156,11 +157,9 @@ public class SortDialog<T> implements ConfigEditor.Listener {
     }
 
     @Override
-    public void onChangeChoose(long id, int position) {
-        Log.d(TAG, "onChangeChoose() called with: id = [" + id + "], position = [" + position + "]");
+    public void onChangeChoose(Config configAt) {
         if (listener != null) {
             sort.clear();
-            Config configAt = configEditor.configs.getConfigAt(position);
             if (configAt instanceof SortConfig) {
                 listener.onInitHistory(((SortConfig) configAt).getConfigItems());
                 handle();
